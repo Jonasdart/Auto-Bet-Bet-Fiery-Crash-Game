@@ -15,7 +15,11 @@ from utils.configs import (
     MULTI_LOSE,
     MULTI_ODD,
     PASSWORD,
-    SAQUE,
+    SAQUE_AMOUNT,
+    SAQUE_CPF,
+    SAQUE_PIX,
+    SAQUE_TITULAR,
+    SAQUE_WHATSAPP,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s-%(levelname)s: %(message)s")
@@ -39,14 +43,6 @@ class Bet:
         chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
         return chrome_options
-
-    def get_saque_data(self):
-        return {
-            "titular": os.getenv("SAQUE_TITULAR", ""),
-            "cpf": os.getenv("SAQUE_CPF", ""),
-            "whatsapp": os.getenv("SAQUE_WHATSAPP", ""),
-            "chave_pix": os.getenv("SAQUE_PIX", ""),
-        }
 
     def _win(self):
         logging.info(f"Win")
@@ -139,8 +135,8 @@ class Bet:
         return
 
     def saque(self):
-        if self.purse_value >= (SAQUE + MIN_PURSE):
-            logging.info(f"-- Aguardando saque de {SAQUE} --")
+        if self.purse_value >= (SAQUE_AMOUNT + MIN_PURSE):
+            logging.info(f"-- Aguardando saque de {SAQUE_AMOUNT} --")
             now = datetime.now()
             if now.hour > 19:
                 sleep_time = 23 - now.hour + 6
@@ -161,22 +157,20 @@ class Bet:
                 )
             )
 
-            saque_data = self.get_saque_data()
-
             self.driver.find_element(
                 By.CLASS_NAME,
                 "roundModal_RadioButton__UWsUG roundModal_activeRadioButton_withdraw__4zg4T",
             ).click()
-            self.driver.find_element(By.ID, "withdraw_w_amount").insert(SAQUE)
+            self.driver.find_element(By.ID, "withdraw_w_amount").insert(SAQUE_AMOUNT)
             self.driver.find_element(By.ID, "withdraw_accountname").insert(
-                saque_data["titular"]
+                SAQUE_TITULAR
             )
-            self.driver.find_element(By.ID, "withdraw_taxid").insert(saque_data["cpf"])
+            self.driver.find_element(By.ID, "withdraw_taxid").insert(SAQUE_CPF)
             self.driver.find_element(By.ID, "withdraw_phone").insert(
-                saque_data["whatsapp"]
+                SAQUE_WHATSAPP
             )
             self.driver.find_element(By.ID, "withdraw_pixkey").insert(
-                saque_data["chave_pix"]
+                SAQUE_PIX
             )
 
             self.driver.find_element(
